@@ -2,6 +2,24 @@ import knex from "../database/connection"; // connecting the database with this 
 import {Request, Response} from 'express'
 
 class LocationsController {
+    async index(request: Request, response: Response) {
+        const {city, state_or_province, garbages} = request.query
+
+        const parsedGarbages = String(garbages)
+        .split(',')
+        .map(garbage => Number(garbage.trim()))
+
+        const locations = await knex('locations')
+        .join('locations_with_garbage_pivot', 'locations.id', '=', 'locations_with_garbage_pivot.local_id')
+        .whereIn('locations_with_garbage_pivot.garbage_id', parsedGarbages)
+        .where('city', String(city))
+        .where('state_or_province', String(state_or_province))
+        .distinct()
+        .select('locations.*')
+
+        return response.json(locations)
+    }
+
     async show(request: Request, response: Response) {
         const { id } = request.params
 
@@ -36,13 +54,13 @@ class LocationsController {
         query 1 can only execute if previous query 2 was successful 
         it makes sure the how post operation will work like {query 1 than query 2 if every query in the process works without any crashs}
          */
-        // const trx = await knex.transaction() // this is generating a bug
+        const trx = await knex.transaction() // trx
         
         const location = {name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "none"}
 
         // image: "none" cause the data table locations does not accept null on image_url
         // query 1
-        const locationsIds = await knex('locations').insert(location) // locationIds = array with all the new ids created at knex('locations') datatable
+        const locationsIds = await trx('locations').insert(location) // locationIds = array with all the new ids created at knex('locations') datatable
     
         const local_id = locationsIds[0]
     
@@ -54,8 +72,10 @@ class LocationsController {
         })
     
         // query 2
-        await knex('locations_with_garbage_pivot').insert(localGarbage)
-    
+        await trx('locations_with_garbage_pivot').insert(localGarbage)
+        
+        await trx.commit() // trx // make the queries get done without it it does not works
+
         return response.json({
             id: local_id,
             ...location

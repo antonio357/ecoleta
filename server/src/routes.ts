@@ -14,6 +14,8 @@ routes.post("/locations", locationsController.create)
 
 routes.get('/locations/:id', locationsController.show)
 
+routes.get('/locations', locationsController.index)
+
 export default routes; // so you can import to server.ts
 
 
