@@ -21,7 +21,18 @@ routes.post("/locations", async (request, response) => {
     const {name, email, whatsapp, city, state_or_province, latitude, longitude, garbages} = request.body 
 
     // image: "none" cause the data table locations does not accept null on image_url
-    await knex('locations').insert({name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "none"})
+    const locationsIds = await knex('locations').insert({name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "none"}) // locationIds = array with all the new ids created at knex('locations') datatable
+
+    const local_id = locationsIds[0]
+
+    const localGarbage = garbages.map((garbage_id: number) => {
+        return {
+            garbage_id,
+            local_id
+        }
+    })
+
+    await knex('locations_with_garbage_pivot').insert(localGarbage)
 
     return response.json({ success: true })
 })
