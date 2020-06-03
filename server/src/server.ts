@@ -1,8 +1,11 @@
 import express, { response, request } from "express" // deals with routes
 import routes from './routes'
 import path from 'path'
+import cors from 'cors'
 
 const app = express()
+
+app.use(cors())
 
 /*
 add json interpreter for express
