@@ -8,8 +8,13 @@ const routes = express.Router(); // disattach the functionalities from the serve
 const garbagesController = new GarbagesController()
 const locationsController = new LocationsController()
 
-routes.get("/garbage", garbagesController.listGarbageClasses);
+routes.get("/garbage", garbagesController.index);
 
-routes.post("/locations", locationsController.createLocation)
+routes.post("/locations", locationsController.create)
+
+routes.get('/locations/:id', locationsController.show)
 
 export default routes; // so you can import to server.ts
+
+
+// pattern for controllers methods index, show, create, update, delete

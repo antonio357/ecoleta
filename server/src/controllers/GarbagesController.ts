@@ -2,7 +2,7 @@ import {Request, Response} from 'express'
 import knex from '../database/connection'
 
 class GarbagesController {
-    async listGarbageClasses(request: Request, response: Response) {
+    async index(request: Request, response: Response) {
         const garbage = await knex("garbage").select("*");
     
         // serialized data means that the front-end will recive the data not in the original way from the database 'rawdata' but instead the data that will be send will be filtered

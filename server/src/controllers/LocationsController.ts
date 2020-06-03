@@ -2,7 +2,32 @@ import knex from "../database/connection"; // connecting the database with this 
 import {Request, Response} from 'express'
 
 class LocationsController {
-    async createLocation(request: Request, response: Response) {
+    async show(request: Request, response: Response) {
+        const { id } = request.params
+
+        const location = await knex('locations').where('id', id).first()
+
+        if (!location) {
+            return response.status(400).json({message: "location not found"})
+        }
+
+        /* 
+        SELECT * FROM  garbage
+            JOIN locations_with_garbage_pivot ON garbage.id = locations_with_garbage_pivot.garbage_id
+            WHERE locations_with_garbage_pivot.local_id = {id}
+        */
+        const garbages = await knex('garbage')
+        .join('locations_with_garbage_pivot', 'garbage.id', '=', 'locations_with_garbage_pivot.garbage_id')
+        .where('locations_with_garbage_pivot.local_id', id)
+        .select('garbage.classification')
+
+        return response.json({
+            garbages,
+            location
+        })
+    }
+
+    async create(request: Request, response: Response) {
         const {name, email, whatsapp, city, state_or_province, latitude, longitude, garbages} = request.body 
     
         /* 
