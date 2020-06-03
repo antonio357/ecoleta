@@ -56,7 +56,7 @@ class LocationsController {
          */
         const trx = await knex.transaction() // trx
         
-        const location = {name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "none"}
+        const location = {name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"}
 
         // image: "none" cause the data table locations does not accept null on image_url
         // query 1
