@@ -20,8 +20,17 @@ routes.get("/garbage", async (request, response) => {
 routes.post("/locations", async (request, response) => {
     const {name, email, whatsapp, city, state_or_province, latitude, longitude, garbages} = request.body 
 
+    /* 
+    will use trx instead of knex
+    cause we have two queries where the query 2 can only execute if previous query 1  was successful and
+    query 1 can only execute if previous query 2 was successful 
+    it makes sure the how post operation will work like {query 1 than query 2 if every query in the process works without any crashs}
+     */
+    const trx = await knex.transaction(); 
+
     // image: "none" cause the data table locations does not accept null on image_url
-    const locationsIds = await knex('locations').insert({name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "none"}) // locationIds = array with all the new ids created at knex('locations') datatable
+    // query 1
+    const locationsIds = await trx('locations').insert({name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "none"}) // locationIds = array with all the new ids created at knex('locations') datatable
 
     const local_id = locationsIds[0]
 
@@ -32,7 +41,8 @@ routes.post("/locations", async (request, response) => {
         }
     })
 
-    await knex('locations_with_garbage_pivot').insert(localGarbage)
+    // query 2
+    await trx('locations_with_garbage_pivot').insert(localGarbage)
 
     return response.json({ success: true })
 })
