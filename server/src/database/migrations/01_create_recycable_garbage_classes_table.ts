@@ -6,7 +6,7 @@ export async function up(knex: Knex) {
     return knex.schema.createTable(tableName, table => {
         table.increments("id").primary();
         table.string('classification').notNullable(); 
-        table.string('image_url').notNullable(); 
+        table.string('image').notNullable(); 
     });
 }
 
