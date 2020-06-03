@@ -23,7 +23,7 @@ export async function up(knex: Knex) { // especifying the type of the variable u
        table.string('email').notNullable();
        table.string('whatsapp'); // it may be notNullable
        table.string('city').notNullable(); 
-       table.string('state/province').notNullable();
+       table.string('state_or_province').notNullable();
        table.decimal('latitude').notNullable();
        table.decimal('longitude').notNullable();
        table.string('image_url').notNullable(); 
