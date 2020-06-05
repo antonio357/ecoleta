@@ -10,7 +10,7 @@ class GarbagesController {
             return {
                 id: garbage.id,
                 classification: garbage.classification,
-                image_url: `http://localhost:3333/images/${garbage.image}`,
+                image_url: `http://192.168.25.128:3333/images/${garbage.image}`,
             };
         });
         return response.json(serializedGarbage);
