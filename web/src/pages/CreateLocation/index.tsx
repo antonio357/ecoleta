@@ -1,5 +1,5 @@
 import React, {useEffect, useState, ChangeEvent, FormEvent} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import './styles.css'
 import {FiArrowLeft} from 'react-icons/fi'
 import {Map, TileLayer, Marker} from 'react-leaflet'
@@ -38,6 +38,7 @@ const CreateLocation = () => {
         whatsapp: '',
     })
     const [selectedItems, setSelectedItems] = useState<number[]>([])
+    const history = useHistory()
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(position => {
@@ -86,8 +87,9 @@ const CreateLocation = () => {
         // console.log("handleSubmit -> dataToRegister", dataToRegister)
         
         await api.post('locations', dataToRegister)
-        // alert('Ponto de Coleta criado!')
+        alert('Ponto de Coleta criado!')
         console.log('Ponto de Coleta criado')
+        history.push("/")
     }
 
     function handleSelectItem(id: number) {
