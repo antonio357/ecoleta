@@ -32,6 +32,12 @@ const CreateLocation = () => {
     const [selectedCity, setSelectedCity] = useState("0")
     const [selectetedPosition, setSelectedPosition] = useState<[number, number]>([0, 0])
     const [initialPosition, setInitialPosition] = useState<[number, number]>([-7.2219196, -35.92182])
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        whatsapp: '',
+    })
+    const [selectedItems, setSelectedItems] = useState<number[]>([])
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(position => {
@@ -66,6 +72,24 @@ const CreateLocation = () => {
             setCities(cities)
         })
     }, [selectedUf])
+
+    function handleSelectItem(id: number) {
+        const selected = selectedItems.findIndex(item => item === id)
+
+        if (selected < 0) {
+            setSelectedItems([...selectedItems, id])
+            return
+        }
+
+        const filteredItems = selectedItems.filter(item => item !== id)
+        setSelectedItems(filteredItems)
+    }
+
+    function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
+        // console.log(event.target.name, event.target.value) // in this way you have the same function working for all inputs and yout can identify each input by its name
+        const {name, value} = event.target
+        setFormData({...formData, [name]: value}) // this way you copy the information that all ready exited there only changing what you want
+    }
 
     function handleSelectUf(event: ChangeEvent<HTMLSelectElement>) {
         const uf = event.target.value
@@ -106,6 +130,7 @@ const CreateLocation = () => {
                             type="text"
                             name="name"
                             id="name"
+                            onChange={handleInputChange}
                         />
                     </div>
 
@@ -116,6 +141,7 @@ const CreateLocation = () => {
                                 type="email"
                                 name="email"
                                 id="email"
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="field">
@@ -124,6 +150,7 @@ const CreateLocation = () => {
                                 type="text"
                                 name="whatsapp"
                                 id="whatsapp"
+                                onChange={handleInputChange}
                             />
                         </div>
                     </div>
@@ -163,12 +190,16 @@ const CreateLocation = () => {
                 <fieldset>
                     <legend>
                         <h2>Ítens de Coleta</h2>
-                        <span>Selecione um ou mais ítens abaixo</span>
+                        <span>Clique e Selecione um ou mais ítens abaixo</span>
                     </legend>
 
                     <ul className="items-grid">
                         {items.map(item => (
-                            <li key={item.id}>
+                            /* () => handleSelectItem(item.id) u have to in this way cause
+                            if u do handleSelectItem(item.id) instead of passiing the reference of the function u are actually calling the function
+                             */
+                            <li key={item.id} onClick={() => handleSelectItem(item.id)}
+                            className={selectedItems.includes(item.id) ? 'selected' : '' /*this is so the user can differ between selected and unselected items */}>
                                 <img src={item.image_url} alt=""/>
                                 <span>{item.classification}</span>
                             </li>
