@@ -4,19 +4,22 @@ import {Request, Response} from 'express'
 class LocationsController {
     async index(request: Request, response: Response) {
         const {city, state_or_province, garbages} = request.query
+        
+        if (city && state_or_province && garbages) {
+            const parsedGarbages = String(garbages)
+            .split(',')
+            .map(garbage => Number(garbage.trim()))
 
-        const parsedGarbages = String(garbages)
-        .split(',')
-        .map(garbage => Number(garbage.trim()))
-
+            const locations = await knex('locations')
+            .join('locations_with_garbage_pivot', 'locations.id', '=', 'locations_with_garbage_pivot.local_id')
+            .whereIn('locations_with_garbage_pivot.garbage_id', parsedGarbages)
+            .where('city', String(city))
+            .where('state_or_province', String(state_or_province))
+            .distinct()
+            .select('locations.*')
+            return response.json(locations)
+        }
         const locations = await knex('locations')
-        .join('locations_with_garbage_pivot', 'locations.id', '=', 'locations_with_garbage_pivot.local_id')
-        .whereIn('locations_with_garbage_pivot.garbage_id', parsedGarbages)
-        .where('city', String(city))
-        .where('state_or_province', String(state_or_province))
-        .distinct()
-        .select('locations.*')
-
         return response.json(locations)
     }
 
