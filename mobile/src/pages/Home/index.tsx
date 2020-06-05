@@ -1,7 +1,16 @@
 import React from 'react'
 import {View, Image, StyleSheet} from 'react-native'
+import { Roboto_400Regular, Roboto_500Medium } from "@expo-google-fonts/roboto";
+import { Ubuntu_700Bold, useFonts } from "@expo-google-fonts/ubuntu";
+import { AppLoading } from "expo";
 
 const Home = () => {
+  const [fontsLoaded] = useFonts({ // this is made to load the fonts before the aplication page start
+    Roboto_400Regular, Roboto_500Medium, Ubuntu_700Bold
+  })
+
+  if (!fontsLoaded) return <AppLoading/> // th page will wait until fonts get loaded
+
   return (
     <View style={styles.container}>
       <Image source={require('../../assets/logo.png')}/>
