@@ -5,6 +5,7 @@ import {FiArrowLeft} from 'react-icons/fi'
 import {Map, TileLayer, Marker} from 'react-leaflet'
 import api from '../../services/api'
 import axios from 'axios'
+import {LeafletMouseEvent} from 'leaflet'
 
 import logo from '../../assets/logo.svg'
 
@@ -29,6 +30,15 @@ const CreateLocation = () => {
     const [selectedUf, setSelectedUf] = useState("0")
     const [cities, setCities] = useState<string[]>([])
     const [selectedCity, setSelectedCity] = useState("0")
+    const [selectetedPosition, setSelectedPosition] = useState<[number, number]>([0, 0])
+    const [initialPosition, setInitialPosition] = useState<[number, number]>([-7.2219196, -35.92182])
+
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(position => {
+            const {latitude, longitude} = position.coords
+            setInitialPosition([latitude, longitude])
+        })
+    }, [])
 
     useEffect(() => {
         api.get('garbage')
@@ -65,6 +75,10 @@ const CreateLocation = () => {
     function handleSelectCity(event: ChangeEvent<HTMLSelectElement>) {
         const city = event.target.value
         setSelectedCity(city)
+    }
+
+    function handleMapClick(event: LeafletMouseEvent) {
+        setSelectedPosition([event.latlng.lat, event.latlng.lng])
     }
 
     return (
@@ -121,12 +135,12 @@ const CreateLocation = () => {
                         <span>Selecione um Endereço no Mapa</span>
                     </legend>
 
-                    <Map center={[-7.2183397,-35.9127367]} zoom={15}>
+                    <Map center={initialPosition} zoom={15} onClick={handleMapClick}>
                         <TileLayer 
                             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        <Marker position={[-7.2183397,-35.9127367]}/>
+                        <Marker position={selectetedPosition}/>
                     </Map>
                     <div className="field-group">
                         <div className='field'>
