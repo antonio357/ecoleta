@@ -1,20 +1,20 @@
 import React from 'react'
-import {View, Image, StyleSheet} from 'react-native'
-import { Roboto_400Regular, Roboto_500Medium } from "@expo-google-fonts/roboto";
-import { Ubuntu_700Bold, useFonts } from "@expo-google-fonts/ubuntu";
-import { AppLoading } from "expo";
+import {View, ImageBackground, Image, StyleSheet, Text} from 'react-native'
 
 const Home = () => {
-  const [fontsLoaded] = useFonts({ // this is made to load the fonts before the aplication page start
-    Roboto_400Regular, Roboto_500Medium, Ubuntu_700Bold
-  })
-
-  if (!fontsLoaded) return <AppLoading/> // th page will wait until fonts get loaded
-
   return (
-    <View style={styles.container}>
-      <Image source={require('../../assets/logo.png')}/>
-    </View>
+    <ImageBackground 
+      source={require('../../assets/home-background.png')} 
+      style={styles.container} 
+      imageStyle={{width: 274, height: 368}}
+    >
+      <View style={styles.main}>
+        <Image source={require('../../assets/logo.png')}/>
+        <Text style={styles.title}>Seu marketplace de coleta de resíduos</Text>
+        <Text style={styles.description}>Ajudamos pessoas a encontrarem pontos de coleta de forma eficiente</Text>
+      </View>
+
+    </ImageBackground>
   )
 }
 
@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 32,
+    backgroundColor: '#f0f0f5',
   },
 
   main: {
