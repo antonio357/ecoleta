@@ -4,7 +4,7 @@ import { Roboto_400Regular, Roboto_500Medium } from "@expo-google-fonts/roboto";
 import { Ubuntu_700Bold, useFonts } from "@expo-google-fonts/ubuntu";
 import { AppLoading } from "expo";
 
-import Home from './src/pages/Home'
+import Routes from './src/routes'
 
 // here it does not have html tags, only react-native elements
 // style={styles.container} this is how you add style
@@ -20,7 +20,7 @@ export default function App() {
   return (
     <>  
       <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent/>
-      <Home />
+      <Routes />
     </>
   );
 }
