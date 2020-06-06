@@ -1,13 +1,40 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import {View, StyleSheet, Text, TouchableOpacity, ScrollView, Image} from "react-native";
 import Constants from "expo-constants";
 import { Feather as Icon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import MapView, {Marker} from "react-native-maps";
 import { SvgUri } from "react-native-svg";
+import api from '../../services/api'
+
+interface Item {
+  id: number,
+  classification: string,
+  image_url: string,
+}
 
 const Points = () => {
+    const [items, setItems] = useState<Item[]>([])
+    const [selectedItems, setSelectedItems] = useState<number[]>([])
     const navigation = useNavigation()
+
+    useEffect(() => {
+      api.get('garbage').then(response => {
+        setItems(response.data)
+      })
+    }, [])
+
+    function handleSelectItem(id: number) {
+      const selected = selectedItems.findIndex(item => item === id)
+
+      if (selected < 0) {
+          setSelectedItems([...selectedItems, id])
+          return
+      }
+
+      const filteredItems = selectedItems.filter(item => item !== id)
+      setSelectedItems(filteredItems)
+    }
 
     function hadleNavigateBack() {
         navigation.goBack()
@@ -50,35 +77,22 @@ const Points = () => {
             </View>
             <View style={styles.itemsContainer}>
                 <ScrollView horizontal contentContainerStyle={{ paddingHorizontal: 20}}>
-                    <TouchableOpacity style={styles.item} onPress={() => {}}>
-                        <SvgUri width={42} height= {42} uri='http://192.168.25.128:3333/images/lamps.svg'/>
-                        <Text style={styles.itemTitle}>Lâmpadas</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.item} onPress={() => {}}>
-                        <SvgUri width={42} height= {42} uri='http://192.168.25.128:3333/images/lamps.svg'/>
-                        <Text style={styles.itemTitle}>Lâmpadas</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.item} onPress={() => {}}>
-                        <SvgUri width={42} height= {42} uri='http://192.168.25.128:3333/images/lamps.svg'/>
-                        <Text style={styles.itemTitle}>Lâmpadas</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.item} onPress={() => {}}>
-                        <SvgUri width={42} height= {42} uri='http://192.168.25.128:3333/images/lamps.svg'/>
-                        <Text style={styles.itemTitle}>Lâmpadas</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.item} onPress={() => {}}>
-                        <SvgUri width={42} height= {42} uri='http://192.168.25.128:3333/images/lamps.svg'/>
-                        <Text style={styles.itemTitle}>Lâmpadas</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.item} onPress={() => {}}>
-                        <SvgUri width={42} height= {42} uri='http://192.168.25.128:3333/images/lamps.svg'/>
-                        <Text style={styles.itemTitle}>Lâmpadas</Text>
-                    </TouchableOpacity>
+                    {
+                      items.map(item => (
+                        <TouchableOpacity 
+                          key={String(item.id)} 
+                          style={[
+                            styles.item,
+                            selectedItems.includes(item.id) ? styles.selectedItem : {} 
+                          ]} 
+                          onPress={() => {handleSelectItem(item.id)}}
+                          activeOpacity={0.5}
+                        >
+                          <SvgUri width={42} height= {42} uri={item.image_url}/>
+                          <Text style={styles.itemTitle}>{item.classification}</Text>
+                        </TouchableOpacity>
+                      ))
+                    }
                 </ScrollView>
             </View>
         </>
