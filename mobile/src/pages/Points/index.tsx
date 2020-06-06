@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react'
-import {View, StyleSheet, Text, TouchableOpacity, ScrollView, Image} from "react-native";
+import {View, StyleSheet, Text, TouchableOpacity, ScrollView, Image, Alert} from "react-native";
 import Constants from "expo-constants";
 import { Feather as Icon } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import MapView, {Marker} from "react-native-maps";
 import { SvgUri } from "react-native-svg";
 import api from '../../services/api'
+import * as Location from 'expo-location'
 
 interface Item {
   id: number,
@@ -17,11 +18,27 @@ const Points = () => {
     const [items, setItems] = useState<Item[]>([])
     const [selectedItems, setSelectedItems] = useState<number[]>([])
     const navigation = useNavigation()
+    const [initialPosition, setInicialPosition] = useState<[number, number]>([0, 0])
 
     useEffect(() => {
       api.get('garbage').then(response => {
         setItems(response.data)
       })
+    }, [])
+
+    useEffect(() => {
+      async function loadPosition() {
+        const {status} = await Location.requestPermissionsAsync()
+        if (status !== 'granted') {
+          Alert.alert('É necessario conceder sua permissção a sua localização para utilização do mapa')
+          return
+        }
+
+        const location = await Location.getCurrentPositionAsync()
+        const {latitude, longitude} = location.coords
+        setInicialPosition([latitude, longitude])
+      }
+      loadPosition()
     }, [])
 
     function handleSelectItem(id: number) {
@@ -55,24 +72,29 @@ const Points = () => {
                 <Text style={styles.description}>Encontre no mapa um ponto de coleta</Text>
             
                 <View style={styles.mapContainer}>
-                    <MapView style={styles.map} initialRegion={{
-                        latitude: -7.2219196,
-                        longitude: -35.9130652,
+                    {/* initialPosition[0] !== 0 && (): qhat is inside will execuse only when before  && gets to be true */}
+                    {initialPosition[0] !== 0 && (
+                      <MapView 
+                      style={styles.map} 
+                      initialRegion={{
+                        latitude: initialPosition[0],
+                        longitude: initialPosition[1],
                         latitudeDelta: 0.014,
                         longitudeDelta: 0.014,
-                    }}>
-                        <Marker onPress={handleNavigateToDetail}
-                        style={styles.mapMarker} 
-                        coordinate={{
-                            latitude: -7.2219196,
-                            longitude: -35.9130652,
-                        }}>
-                            <View style={styles.mapMarkerContainer} >
-                                <Image style={styles.mapMarkerImage} source={{uri:'https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60'}}/>
-                                <Text style={styles.mapMarkerTitle}>Mercado</Text>
-                            </View>
-                        </Marker>
-                    </MapView>
+                      }}>
+                      <Marker onPress={handleNavigateToDetail}
+                      style={styles.mapMarker} 
+                      coordinate={{
+                          latitude: -7.2219196,
+                          longitude: -35.9130652,
+                      }}>
+                          <View style={styles.mapMarkerContainer} >
+                              <Image style={styles.mapMarkerImage} source={{uri:'https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60'}}/>
+                              <Text style={styles.mapMarkerTitle}>Mercado</Text>
+                          </View>
+                      </Marker>
+                  </MapView>
+                    )}
                 </View>
             </View>
             <View style={styles.itemsContainer}>
