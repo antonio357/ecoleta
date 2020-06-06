@@ -5,22 +5,26 @@ class LocationsController {
     async index(request: Request, response: Response) {
         const {city, state_or_province, garbages} = request.query
         
-        if (city && state_or_province && garbages) {
-            const parsedGarbages = String(garbages)
-            .split(',')
-            .map(garbage => Number(garbage.trim()))
+        const parsedGarbages = String(garbages)
+        .split(',')
+        .map(garbage => Number(garbage.trim()))
 
-            const locations = await knex('locations')
-            .join('locations_with_garbage_pivot', 'locations.id', '=', 'locations_with_garbage_pivot.local_id')
-            .whereIn('locations_with_garbage_pivot.garbage_id', parsedGarbages)
-            .where('city', String(city))
-            .where('state_or_province', String(state_or_province))
-            .distinct()
-            .select('locations.*')
-            return response.json(locations)
-        }
         const locations = await knex('locations')
-        return response.json(locations)
+        .join('locations_with_garbage_pivot', 'locations.id', '=', 'locations_with_garbage_pivot.local_id')
+        .whereIn('locations_with_garbage_pivot.garbage_id', parsedGarbages)
+        .where('city', String(city))
+        .where('state_or_province', String(state_or_province))
+        .distinct()
+        .select('locations.*')
+        
+        const serializedLocations = locations.map((location) => {
+            return {
+                ...location,
+                image_url: `http://192.168.25.128:3333/images/${location.image_url}`,
+            };
+        });
+        
+        return response.json(serializedLocations)
     }
 
     async show(request: Request, response: Response) {
@@ -31,6 +35,11 @@ class LocationsController {
         if (!location) {
             return response.status(400).json({message: "location not found"})
         }
+
+        const serializedLocation = {
+            ...location,
+            image_url: `http://192.168.25.128:3333/images/${location.image_url}`,
+        };
 
         /* 
         SELECT * FROM  garbage
@@ -44,12 +53,19 @@ class LocationsController {
 
         return response.json({
             garbages,
-            location
+            location: serializedLocation
         })
     }
 
     async create(request: Request, response: Response) {
-        const {name, email, whatsapp, city, state_or_province, latitude, longitude, garbages} = request.body 
+        const {name, 
+            email, 
+            whatsapp, 
+            city, 
+            state_or_province, 
+            latitude, 
+            longitude, 
+            garbages} = request.body 
     
         /* 
         will use trx instead of knex
@@ -59,7 +75,14 @@ class LocationsController {
          */
         const trx = await knex.transaction() // trx
         
-        const location = {name, email, whatsapp, city, state_or_province, latitude, longitude, image_url: "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"}
+        const location = {name, 
+            email, 
+            whatsapp, 
+            city, 
+            state_or_province, 
+            latitude, 
+            longitude, 
+            image_url: request.file.filename}
 
         // image: "none" cause the data table locations does not accept null on image_url
         // query 1
@@ -67,7 +90,10 @@ class LocationsController {
     
         const local_id = locationsIds[0]
     
-        const localGarbage = garbages.map((garbage_id: number) => {
+        const localGarbage = garbages
+        .split(',')
+        .map((item : string) => Number(item.trim()))
+        .map((garbage_id: number) => {
             return {
                 garbage_id,
                 local_id

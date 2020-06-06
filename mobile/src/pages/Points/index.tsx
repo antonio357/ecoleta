@@ -18,6 +18,7 @@ interface Point {
   id: number,
   name: string,
   image_url: string,
+  //image: string,
   latitude: number,
   longitude: number,
 }

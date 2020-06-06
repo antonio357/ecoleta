@@ -6,6 +6,7 @@ import {Map, TileLayer, Marker} from 'react-leaflet'
 import api from '../../services/api'
 import axios from 'axios'
 import {LeafletMouseEvent} from 'leaflet'
+import Dropzone from '../../components/Dropzone/index'
 
 import logo from '../../assets/logo.svg'
 
@@ -39,6 +40,7 @@ const CreateLocation = () => {
     })
     const [selectedItems, setSelectedItems] = useState<number[]>([])
     const history = useHistory()
+    const [seletecFile, setSeletecFile] = useState<File>()
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(position => {
@@ -83,7 +85,19 @@ const CreateLocation = () => {
         const [latitude, longitude] = selectetedPosition;
         const garbages = selectedItems;
 
-        const dataToRegister = {name, email, whatsapp, state_or_province, city, latitude, longitude, garbages};
+        const dataToRegister = new FormData()
+        
+        dataToRegister.append('name', name)
+        dataToRegister.append('email', email)
+        dataToRegister.append('whatsapp', whatsapp)
+        dataToRegister.append('state_or_province', state_or_province)
+        dataToRegister.append('city', city)
+        dataToRegister.append('latitude', String(latitude))
+        dataToRegister.append('longitude', String(longitude))
+        dataToRegister.append('garbages', garbages.join(','))
+        if(seletecFile) dataToRegister.append('image_url', seletecFile)
+
+        //const dataToRegister = {name, email, whatsapp, state_or_province, city, latitude, longitude, garbages};
         // console.log("handleSubmit -> dataToRegister", dataToRegister)
         
         await api.post('locations', dataToRegister)
@@ -137,6 +151,8 @@ const CreateLocation = () => {
 
             <form onSubmit={handleSubmit}>
                 <h1>Cadastro do <br/> ponto de coleta</h1>
+
+                <Dropzone onFileuploaded={setSeletecFile}/>
 
                 <fieldset>
                     <legend>

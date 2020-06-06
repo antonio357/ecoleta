@@ -19,6 +19,7 @@ interface Data {
         city: string;
         state_or_province: string;
         image_url: string;
+        //image: string,
     },
     garbages: {classification: string}[]
 }
