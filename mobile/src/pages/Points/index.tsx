@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {View, StyleSheet, Text, TouchableOpacity, ScrollView, Image, Alert} from "react-native";
 import Constants from "expo-constants";
 import { Feather as Icon } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import MapView, {Marker} from "react-native-maps";
 import { SvgUri } from "react-native-svg";
 import api from '../../services/api'
@@ -22,23 +22,31 @@ interface Point {
   longitude: number,
 }
 
+interface Params {
+  city: string;
+  uf: string;
+}
+
 const Points = () => {
     const [items, setItems] = useState<Item[]>([])
     const [selectedItems, setSelectedItems] = useState<number[]>([])
     const navigation = useNavigation()
     const [initialPosition, setInicialPosition] = useState<[number, number]>([0, 0])
     const [points, setPoints] = useState<Point[]>([])
-
+    const route = useRoute() 
+    const routeParams = route.params as Params
+    
     useEffect(() => {
       api.get('locations', {
         params: {
-          city: "campina grande",
-          state_or_province: "PB",
+          city: routeParams.city,
+          state_or_province: routeParams.uf,
+          garbages: selectedItems
         }
       }).then(response => {
         setPoints(response.data)
       })
-    }, [])
+    }, [selectedItems])
 
     useEffect(() => {
       api.get('garbage').then(response => {
